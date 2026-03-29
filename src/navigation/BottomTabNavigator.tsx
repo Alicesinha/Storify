@@ -5,12 +5,8 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { BottomTabParamList, ProductsStackParamList } from './types'
 import { ProductListScreen } from '@modules/products/screens/ProductListScreen'
 import { ProductDetailScreen } from '@modules/products/screens/ProductDetailScreen'
-
-const CartPlaceholder = () => (
-  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-    <Text>Carrinho</Text>
-  </View>
-)
+import { CartScreen } from '@modules/cart/screens/CartScreen'
+import { useCartStore } from '@modules/cart/store/cartStore'
 
 const CheckoutPlaceholder = () => (
   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -47,8 +43,11 @@ export const BottomTabNavigator = () => {
       />
       <Tab.Screen
         name="CartTab"
-        component={CartPlaceholder}
-        options={{ title: 'Carrinho' }}
+        component={CartScreen}
+        options={{
+          title: 'Carrinho',
+          tabBarBadge: useCartStore.getState().totalItems || undefined,
+        }}
       />
       <Tab.Screen
         name="CheckoutTab"
