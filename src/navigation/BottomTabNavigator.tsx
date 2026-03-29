@@ -7,11 +7,15 @@ import { ProductDetailScreen } from '@modules/products/screens/ProductDetailScre
 import { CartScreen } from '@modules/cart/screens/CartScreen'
 import { useCartStore } from '@modules/cart/store/cartStore'
 import { CheckoutScreen } from '@modules/checkout/screens/CheckoutScreens'
+import { BatteryIndicator } from '@shared/components/BatteryIndicator'
 
 const ProductsStack = createStackNavigator<ProductsStackParamList>()
 
 const ProductsNavigator = () => (
-  <ProductsStack.Navigator>
+  <ProductsStack.Navigator
+    screenOptions={{
+      headerRight: () => <BatteryIndicator />,
+    }}>
     <ProductsStack.Screen
       name="ProductList"
       component={ProductListScreen}
