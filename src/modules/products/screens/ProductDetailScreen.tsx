@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { View, Text, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { ProductsStackParamList } from '@navigation/types'
 import { productService, Product } from '../services/productService'
 import { logger } from '@shared/logger'
 import { useCartStore } from '@modules/cart/store/cartStore'
+import { useProductCacheStore } from '@shared/store/productCacheStore'
 
 type Route = RouteProp<ProductsStackParamList, 'ProductDetail'>
 
@@ -18,24 +19,33 @@ export const ProductDetailScreen = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchProduct = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const data = await productService.fetchProductById(productId)
-      setProduct(data)
-      logger.info('PRODUCT_DETAIL_FETCHED', { productId })
-    } catch (err) {
-      logger.error('PRODUCT_DETAIL_FETCH_FAILED', { productId, error: String(err) })
-      setError('Não foi possível carregar o produto.')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [productId])
+const { setProductDetail, getProductDetail } = useProductCacheStore()
 
-  useEffect(() => {
-    fetchProduct()
-  }, [fetchProduct])
+const fetchProduct = useCallback(async () => {
+  try {
+    setIsLoading(true)
+    setError(null)
+    const data = await productService.fetchProductById(productId)
+    setProductDetail(data)
+    setProduct(data)
+    logger.info('PRODUCT_DETAIL_FETCHED', { productId })
+  } catch (err) {
+    logger.error('PRODUCT_DETAIL_FETCH_FAILED', { productId, error: String(err) })
+    const cached = getProductDetail(productId)
+    if (cached) {
+      setProduct(cached)
+      setError(null)
+    } else {
+      setError('Não foi possível carregar o produto.')
+    }
+  } finally {
+    setIsLoading(false)
+  }
+}, [productId, setProductDetail, getProductDetail])
+
+useEffect(() => {
+  fetchProduct()
+}, [fetchProduct])
 
   if (isLoading) {
     return (

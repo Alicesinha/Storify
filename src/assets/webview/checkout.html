@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #f9fafb;
+        padding: 24px 16px;
+        color: #1f2937;
+      }
+
+      h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 24px;
+      }
+
+      .card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      }
+
+      .card h3 {
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 12px;
+      }
+
+      .item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 14px;
+      }
+
+      .item:last-child {
+        border-bottom: none;
+      }
+
+      .item-name {
+        color: #374151;
+        flex: 1;
+        margin-right: 8px;
+      }
+      .item-price {
+        color: #059669;
+        font-weight: 600;
+      }
+
+      .total {
+        display: flex;
+        justify-content: space-between;
+        font-size: 18px;
+        font-weight: 700;
+        padding: 12px 0;
+      }
+
+      .total-price {
+        color: #059669;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        margin-bottom: 12px;
+        outline: none;
+      }
+
+      input:focus {
+        border-color: #3b82f6;
+      }
+
+      label {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 4px;
+        display: block;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 8px;
+      }
+
+      .btn-primary {
+        background: #3b82f6;
+        color: white;
+      }
+      .btn-primary:active {
+        background: #2563eb;
+      }
+
+      .status {
+        text-align: center;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        margin-top: 12px;
+        display: none;
+      }
+
+      .status.success {
+        background: #d1fae5;
+        color: #065f46;
+        display: block;
+      }
+      .status.error {
+        background: #fee2e2;
+        color: #991b1b;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Finalizar Pedido</h2>
+
+    <div class="card">
+      <h3>Resumo do pedido</h3>
+      <div id="items-list"></div>
+      <div class="total">
+        <span>Total</span>
+        <span class="total-price" id="total-value">$ 0.00</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Dados de entrega</h3>
+      <label>CEP</label>
+      <input
+        type="text"
+        id="cep"
+        placeholder="00000-000"
+        oninput="handleCepInput(this.value)"
+        maxlength="9" />
+      <label>Endereço</label>
+      <input type="text" id="address" placeholder="Rua, número, bairro" />
+      <label>Nome completo</label>
+      <input type="text" id="name" placeholder="Seu nome" />
+    </div>
+
+    <button class="btn btn-primary" onclick="handleCheckout()">Confirmar Pedido</button>
+
+    <div class="status" id="status"></div>
+
+    <script>
+      document.addEventListener('message', handleAppMessage)
+      window.addEventListener('message', handleAppMessage)
+      let isOnline = true
+
+      function handleAppMessage(event) {
+        console.log('MESSAGE RECEIVED:', event.data)
+        try {
+          const data = JSON.parse(event.data)
+
+          if (data.type === 'CART_DATA') {
+            renderCart(data.payload)
+          }
+
+          if (data.type === 'CHECKOUT_STARTED') {
+            console.log('Checkout iniciado, total:', data.payload.total)
+          }
+        } catch (e) {
+          sendToApp({
+            type: 'ERROR',
+            payload: { message: 'Erro ao processar mensagem', code: 'PARSE_ERROR' },
+          })
+        }
+      }
+
+      function renderCart(items) {
+        const list = document.getElementById('items-list')
+        let total = 0
+
+        list.innerHTML = items
+          .map(item => {
+            const subtotal = item.product.price * item.quantity
+            total += subtotal
+            return `
+          <div class="item">
+            <span class="item-name">${item.product.title} x${item.quantity}</span>
+            <span class="item-price">$ ${subtotal.toFixed(2)}</span>
+          </div>
+        `
+          })
+          .join('')
+
+        document.getElementById('total-value').textContent = `$ ${total.toFixed(2)}`
+      }
+
+      function handleCepInput(value) {
+        const cep = value.replace(/\D/g, '')
+
+        if (cep.length <= 5) {
+          document.getElementById('cep').value = cep
+        } else {
+          document.getElementById('cep').value = cep.slice(0, 5) + '-' + cep.slice(5, 8)
+        }
+
+        if (cep.length === 8) {
+          fetchAddress(cep)
+        }
+      }
+
+      if (data.type === 'NETWORK_STATUS') {
+        isOnline = data.payload.isConnected
+      }
+
+      function fetchAddress(cep) {
+        if (!isOnline) {
+          showStatus('Sem conexão. Preencha o endereço manualmente.', true)
+          document.getElementById('address').focus()
+          return
+        }
+
+        fetch(`https://viacep.com.br/ws/${cep}/json/`, { cache: 'no-store' })
+          .then(res => res.json())
+          .then(data => {
+            if (data.erro) {
+              showStatus('CEP não encontrado.', true)
+              return
+            }
+            const address = `${data.logradouro}, ${data.bairro}, ${data.localidade} - ${data.uf}`
+            document.getElementById('address').value = address
+            document.getElementById('name').focus()
+          })
+          .catch(() => {
+            showStatus('Sem conexão. Preencha o endereço manualmente.', true)
+            document.getElementById('address').focus()
+          })
+      }
+      function handleCheckout() {
+        const name = document.getElementById('name').value
+        const address = document.getElementById('address').value
+        const cep = document.getElementById('cep').value
+
+        if (!name || !address || !cep) {
+          sendToApp({
+            type: 'ERROR',
+            payload: { message: 'Preencha todos os campos', code: 'VALIDATION_ERROR' },
+          })
+          showStatus('Preencha todos os campos.', true)
+          return
+        }
+
+        const orderId = 'ORD-' + Date.now()
+        sendToApp({ type: 'PURCHASE_COMPLETED', payload: { orderId } })
+        showStatus(`Pedido ${orderId} confirmado! ✓`, false)
+      }
+
+      function sendToApp(data) {
+        if (window.ReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(JSON.stringify(data))
+        }
+      }
+
+      function showStatus(message, isError) {
+        const el = document.getElementById('status')
+        el.textContent = message
+        el.className = 'status ' + (isError ? 'error' : 'success')
+      }
+
+    </script>
+  </body>
+</html>
