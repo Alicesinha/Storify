@@ -1,5 +1,4 @@
 import React from 'react'
-import { View, Text } from 'react-native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createStackNavigator } from '@react-navigation/stack'
 import { BottomTabParamList, ProductsStackParamList } from './types'
@@ -7,12 +6,7 @@ import { ProductListScreen } from '@modules/products/screens/ProductListScreen'
 import { ProductDetailScreen } from '@modules/products/screens/ProductDetailScreen'
 import { CartScreen } from '@modules/cart/screens/CartScreen'
 import { useCartStore } from '@modules/cart/store/cartStore'
-
-const CheckoutPlaceholder = () => (
-  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-    <Text>Checkout</Text>
-  </View>
-)
+import { CheckoutScreen } from '@modules/checkout/screens/CheckoutScreens'
 
 const ProductsStack = createStackNavigator<ProductsStackParamList>()
 
@@ -49,11 +43,7 @@ export const BottomTabNavigator = () => {
           tabBarBadge: useCartStore.getState().totalItems || undefined,
         }}
       />
-      <Tab.Screen
-        name="CheckoutTab"
-        component={CheckoutPlaceholder}
-        options={{ title: 'Checkout' }}
-      />
+      <Tab.Screen name="CheckoutTab" component={CheckoutScreen} options={{ title: 'Checkout' }} />
     </Tab.Navigator>
   )
 }
