@@ -4,6 +4,7 @@ import { RouteProp, useRoute } from '@react-navigation/native'
 import { ProductsStackParamList } from '@navigation/types'
 import { productService, Product } from '../services/productService'
 import { logger } from '@shared/logger'
+import { useCartStore } from '@modules/cart/store/cartStore'
 
 type Route = RouteProp<ProductsStackParamList, 'ProductDetail'>
 
@@ -11,10 +12,12 @@ export const ProductDetailScreen = () => {
   const route = useRoute<Route>()
   const { productId } = route.params
 
+  const addItem = useCartStore(state => state.addItem)
+
   const [product, setProduct] = useState<Product | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
+
   const fetchProduct = useCallback(async () => {
     try {
       setIsLoading(true)
@@ -69,7 +72,9 @@ export const ProductDetailScreen = () => {
           <Text className="text-gray-400 text-xs">({product.rating.count} avaliações)</Text>
         </View>
         <Text className="text-sm text-gray-600 leading-6">{product.description}</Text>
-        <TouchableOpacity className="bg-blue-500 py-4 rounded-lg mt-2 items-center">
+        <TouchableOpacity
+          className="bg-blue-500 py-4 rounded-lg mt-2 items-center"
+          onPress={() => addItem(product)}>
           <Text className="text-white font-bold text-base">Adicionar ao carrinho</Text>
         </TouchableOpacity>
       </View>
