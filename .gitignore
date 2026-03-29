@@ -73,3 +73,7 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# IMG
+android/app/src/main/res/mipmap-*/
+ios/EcommerceApp/Images.xcassets/AppIcon.appiconset/
