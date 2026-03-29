@@ -7,7 +7,7 @@ import { API_BASE_URL } from '@env'
 const TIMEOUT = 10000
 const MAX_RETRIES = 3
 
-const httpClient = axios.create({
+export const httpClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: TIMEOUT,
 })
@@ -45,4 +45,3 @@ httpClient.interceptors.response.use(
   },
 )
 
-export default httpClient

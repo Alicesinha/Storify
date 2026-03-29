@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import { Product } from '../services/productService'
+import { Product } from '../../modules/products/services/productService'
 import { createMMKV } from 'react-native-mmkv'
 
 const storage = createMMKV({ id: 'product-cache' })

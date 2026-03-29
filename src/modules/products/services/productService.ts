@@ -1,4 +1,5 @@
-import httpClient from '@shared/services/httpClient'
+import { httpClient } from "@shared/services/httpClient"
+
 
 export type Product = {
   id: number
