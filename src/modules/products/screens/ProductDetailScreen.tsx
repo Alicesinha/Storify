@@ -19,33 +19,35 @@ export const ProductDetailScreen = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-const { setProductDetail, getProductDetail } = useProductCacheStore()
+  const { setProductDetail, getProductDetail } = useProductCacheStore()
 
-const fetchProduct = useCallback(async () => {
-  try {
-    setIsLoading(true)
-    setError(null)
-    const data = await productService.fetchProductById(productId)
-    setProductDetail(data)
-    setProduct(data)
-    logger.info('PRODUCT_DETAIL_FETCHED', { productId })
-  } catch (err) {
-    logger.error('PRODUCT_DETAIL_FETCH_FAILED', { productId, error: String(err) })
+  const fetchProduct = useCallback(async () => {
     const cached = getProductDetail(productId)
     if (cached) {
       setProduct(cached)
-      setError(null)
+      setIsLoading(false)
     } else {
-      setError('Não foi possível carregar o produto.')
+      setIsLoading(true)
     }
-  } finally {
-    setIsLoading(false)
-  }
-}, [productId, setProductDetail, getProductDetail])
 
-useEffect(() => {
-  fetchProduct()
-}, [fetchProduct])
+    try {
+      const data = await productService.fetchProductById(productId)
+      setProductDetail(data)
+      setProduct(data)
+      logger.info('PRODUCT_DETAIL_FETCHED', { productId })
+    } catch (err) {
+      logger.error('PRODUCT_DETAIL_FETCH_FAILED', { productId, error: String(err) })
+      if (!cached) {
+        setError('Não foi possível carregar o produto.')
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [productId, setProductDetail, getProductDetail])
+
+  useEffect(() => {
+    fetchProduct()
+  }, [fetchProduct])
 
   if (isLoading) {
     return (
