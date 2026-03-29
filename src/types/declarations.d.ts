@@ -1,0 +1,5 @@
+declare module '@navigation'
+declare module '@modules/*'
+declare module '@shared/*'
+declare module '@native/*'
+declare module '@assets/*'
