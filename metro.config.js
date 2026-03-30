@@ -1,11 +1,13 @@
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const path = require('path')
 
-/**
- * Metro configuration
- * https://reactnative.dev/docs/metro
- *
- * @type {import('@react-native/metro-config').MetroConfig}
- */
-const config = {};
+const config = mergeConfig(getDefaultConfig(__dirname), {
+  watchFolders: [path.resolve(__dirname, 'node_modules')],
+  resolver: {
+    assetExts: ['html', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ttf', 'otf'],
+  },
+})
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+module.exports = config
