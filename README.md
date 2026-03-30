@@ -1,97 +1,124 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# EcommerceApp
 
-# Getting Started
+Aplicativo mobile de e-commerce desenvolvido em React Native CLI.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Como executar
 
-## Step 1: Start Metro
+### Pré-requisitos
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+- Node.js >= 18
+- JDK 17
+- Android Studio + emulador configurado
+- React Native CLI
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+### Instalação
+```bash
+# Clone o repositório
+git clone https://github.com/alicesinha/EcommerceApp.git
+cd EcommerceApp
 
-```sh
-# Using npm
+# Instale as dependências
+npm install
+```
+
+### Executando
+```bash
+# Inicie o Metro
 npm start
 
-# OR using Yarn
-yarn start
-```
-
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
-
-```sh
-# Using npm
+# Em outro terminal, rode no Android
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
-### iOS
+> ⚠️ O primeiro build pode demorar alguns minutos devido à compilação
+> das dependências nativas (Reanimated, MMKV). Builds subsequentes são
+> significativamente mais rápidos.
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+### Testes
+```bash
+npm test
 ```
 
-Then, and every time you update your native dependencies, run:
+---
 
-```sh
-bundle exec pod install
+## Arquitetura
+```
+src/
+├── modules/
+│   ├── products/       # Listagem e detalhe de produtos
+│   ├── cart/           # Carrinho de compras
+│   └── checkout/       # Checkout via WebView
+├── shared/
+│   ├── components/     # Componentes reutilizáveis
+│   ├── hooks/          # Hooks compartilhados
+│   ├── services/       # HTTP client
+│   ├── store/          # Cache de produtos
+│   └── logger/         # Logger estruturado
+├── native/
+│   └── BatteryModule/  # Ponte JS para módulo nativo
+└── navigation/         # Navegação (Stack + Bottom Tabs)
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+---
 
-```sh
-# Using npm
-npm run ios
+## Decisões técnicas
 
-# OR using Yarn
-yarn ios
-```
+### Gerenciamento de estado
+- **Zustand** — escolhido pela ausência de boilerplate, API simples
+  e possibilidade de acessar o estado fora de componentes
+- **MMKV** — storage síncrono 10x mais rápido que AsyncStorage,
+  usado para persistir o cache de produtos
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### Cache offline (Stale-While-Revalidate)
+- Produtos em cache são exibidos imediatamente
+- Atualização em background quando o cache expira (5 min)
+- Detalhe do produto também é cacheado — exibição instantânea
+  mesmo offline após primeira visita
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+### WebView + Checkout
+- HTML bundled no app para o formulário funcionar offline
+- Confirmação do pagamento bloqueada sem conexão — comportamento
+  intencional equivalente a apps reais de e-commerce
+- Comunicação bidirecional via `postMessage` com eventos tipados
+- Busca de endereço via ViaCEP ao digitar o CEP
+- No Android o HTML é servido via `file:///android_asset/`
+  para compatibilidade com arquivos locais
 
-## Step 3: Modify your app
+### Módulo nativo de bateria
+- **Android**: `BroadcastReceiver` com `ACTION_BATTERY_CHANGED`
+- **iOS**: `NotificationCenter` com `batteryLevelDidChangeNotification`
+- Listener de evento em vez de polling — sem consumo desnecessário
+- `startBatteryListener`/`stopBatteryListener` para ciclo de vida
+  correto sem memory leak
 
-Now that you have successfully run the app, let's make changes!
+### Resiliência
+- Axios com interceptor de retry (3 tentativas, delay crescente)
+- Cache offline para listagem e detalhe de produtos
+- Estados de loading, erro e offline em todas as telas
+- Banner amarelo quando offline
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+### Logger estruturado
+- Todos os eventos logados em JSON com timestamp e nível
+- Eventos da WebView logados com direção (APP→WEB / WEB→APP)
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+---
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+## Diferenciais implementados
 
-## Congratulations! :tada:
+- [x] TypeScript em todo o projeto
+- [x] Testes automatizados (17 testes)
+- [x] Cache avançado com Stale-While-Revalidate
+- [x] Padronização de eventos entre app e WebView
+- [x] Logs e debug estruturado
 
-You've successfully run and modified your React Native App. :partying_face:
+---
 
-### Now what?
+## Possíveis melhorias
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- Testes de integração com Detox
+- Implementar módulo de bateria para iOS com testes em device real
+- Adicionar animações de transição entre telas
+- Implementar busca e filtro de produtos
+- Paginação na listagem de produtos
+- Internacionalização (i18n)
+- CI/CD com GitHub Actions + EAS Build
