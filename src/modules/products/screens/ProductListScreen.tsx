@@ -7,6 +7,9 @@ import { ProductCard } from '../components/ProductCard'
 import { ProductSkeleton } from '../components/ProductSkeleton'
 import { Product } from '../services/productService'
 import { StackNavigationProp } from '@react-navigation/stack'
+import { FeaturedCarousel } from '../components/FeaturedCarousel'
+import { AnimatedScreen } from '@shared/components/AnimatedScreen'
+import { Button } from '@shared/components/Button'
 
 type Navigation = StackNavigationProp<ProductsStackParamList, 'ProductList'>
 
@@ -28,11 +31,7 @@ const ProductListScreen = () => {
     return (
       <View className="flex-1 bg-gray-50 items-center justify-center p-4">
         <Text className="text-gray-500 text-base mb-4">{error}</Text>
-        <TouchableOpacity
-          className="bg-blue-500 px-6 py-3 rounded-lg"
-          onPress={refetch}>
-          <Text className="text-white font-medium">Tentar novamente</Text>
-        </TouchableOpacity>
+          <Button label="Tentar novamente" onPress={refetch} />
       </View>
     )
   }
@@ -42,24 +41,27 @@ const ProductListScreen = () => {
   }
 
   return (
-    <View className="flex-1 bg-gray-50">
-      {isOffline && (
-        <View className="bg-yellow-400 px-4 py-2">
-          <Text className="text-yellow-900 text-xs text-center font-medium">
-            Você está offline. Exibindo dados do cache.
-          </Text>
-        </View>
-      )}
-      <FlatList
-        data={products}
-        keyExtractor={item => String(item.id)}
-        renderItem={({ item }) => (
-          <ProductCard product={item} onPress={handleProductPress} />
+    <AnimatedScreen>
+      <View className="flex-1 bg-gray-50">
+        {isOffline && (
+          <View className="bg-yellow-400 px-4 py-2">
+            <Text className="text-yellow-900 text-xs text-center font-medium">
+              Você está offline. Exibindo dados do cache.
+            </Text>
+          </View>
         )}
-        contentContainerStyle={{ padding: 16 }}
-        showsVerticalScrollIndicator={false}
-      />
-    </View>
+        <FlatList
+          data={products}
+          keyExtractor={item => String(item.id)}
+          renderItem={({ item }) => <ProductCard product={item} onPress={handleProductPress} />}
+          ListHeaderComponent={
+            <FeaturedCarousel products={products} onPress={handleProductPress} />
+          }
+          contentContainerStyle={{ padding: 16 }}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+    </AnimatedScreen>
   )
 }
 

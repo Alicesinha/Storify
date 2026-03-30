@@ -6,6 +6,9 @@ import { productService, Product } from '../services/productService'
 import { logger } from '@shared/logger'
 import { useCartStore } from '@modules/cart/store/cartStore'
 import { useProductCacheStore } from '@shared/store/productCacheStore'
+import { AnimatedScreen } from '@shared/components/AnimatedScreen'
+import { AnimatedButton } from '@shared/components/AnimatedButton'
+import { Button } from '@shared/components/Button'
 
 type Route = RouteProp<ProductsStackParamList, 'ProductDetail'>
 
@@ -61,35 +64,35 @@ export const ProductDetailScreen = () => {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50 p-4">
         <Text className="text-gray-500 text-base mb-4">{error}</Text>
-        <TouchableOpacity className="bg-blue-500 px-6 py-3 rounded-lg" onPress={fetchProduct}>
-          <Text className="text-white font-medium">Tentar novamente</Text>
-        </TouchableOpacity>
+        <Button label="Tentar novamente" onPress={fetchProduct} />
       </View>
     )
   }
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
-      <Image
-        source={{ uri: product.image }}
-        className="w-full h-72 bg-white"
-        resizeMode="contain"
-      />
-      <View className="p-4 gap-3">
-        <Text className="text-lg font-bold text-gray-800">{product.title}</Text>
-        <Text className="text-xs text-gray-400 capitalize">{product.category}</Text>
-        <Text className="text-2xl font-bold text-green-600">$ {product.price.toFixed(2)}</Text>
-        <View className="flex-row items-center gap-1">
-          <Text className="text-yellow-500 text-sm">★ {product.rating.rate}</Text>
-          <Text className="text-gray-400 text-xs">({product.rating.count} avaliações)</Text>
+    <AnimatedScreen>
+      <ScrollView className="flex-1 bg-gray-50">
+        <Image
+          source={{ uri: product.image }}
+          className="w-full h-72 bg-white"
+          resizeMode="contain"
+        />
+        <View className="p-4 gap-3">
+          <Text className="text-lg font-bold text-gray-800">{product.title}</Text>
+          <Text className="text-xs text-gray-400 capitalize">{product.category}</Text>
+          <Text className="text-2xl font-bold text-green-600">$ {product.price.toFixed(2)}</Text>
+          <View className="flex-row items-center gap-1">
+            <Text className="text-yellow-500 text-sm">★ {product.rating.rate}</Text>
+            <Text className="text-gray-400 text-xs">({product.rating.count} avaliações)</Text>
+          </View>
+          <Text className="text-sm text-gray-600 leading-6">{product.description}</Text>
+          <AnimatedButton
+            label="Adicionar ao carrinho"
+            labelSuccess="Adicionado ao carrinho"
+            onPress={() => addItem(product)}
+          />
         </View>
-        <Text className="text-sm text-gray-600 leading-6">{product.description}</Text>
-        <TouchableOpacity
-          className="bg-blue-500 py-4 rounded-lg mt-2 items-center"
-          onPress={() => addItem(product)}>
-          <Text className="text-white font-bold text-base">Adicionar ao carrinho</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </AnimatedScreen>
   )
 }
