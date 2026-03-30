@@ -22,10 +22,10 @@ export const CheckoutScreen = () => {
   const isConnected = useNetworkStatus()
 
   const checkoutSource = Platform.select({
-  android: { uri: 'file:///android_asset/checkout.html' },
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  ios: require('@assets/webview/checkout.html'),
-})
+    android: { uri: 'file:///android_asset/checkout.html' },
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    ios: require('@assets/webview/checkout.html'),
+  })
 
   const sendToWebView = useCallback((event: AppToWebEvent) => {
     const json = JSON.stringify(event).replace(/'/g, "\\'")
@@ -45,6 +45,10 @@ export const CheckoutScreen = () => {
   useEffect(() => {
     sendToWebView({ type: 'NETWORK_STATUS', payload: { isConnected } })
   }, [isConnected, sendToWebView])
+
+  useEffect(() => {
+    sendToWebView({ type: 'CART_DATA', payload: items })
+  }, [items, sendToWebView])
 
   const handleMessage = useCallback(
     (event: WebViewMessageEvent) => {
